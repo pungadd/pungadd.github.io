@@ -1,0 +1,173 @@
+<!DOCTYPE html><html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Rekap Penjualan Chip</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-gray-700 min-h-screen text-white font-sans">
+<div class="max-w-6xl mx-auto py-10 px-5">
+  <h1 class="text-3xl font-bold text-center mb-8">💎 Kalkulator Rekap Penjualan Chip</h1>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+      <h2 class="text-xl font-semibold mb-4">Input Data Keuangan</h2>
+      <label>Saldo Awal (ribu)</label>
+      <input id="saldoAwal" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
+      <label>Pulsa Voucher</label>
+      <input id="pulsaVoucher" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
+      <label>Pengeluaran</label>
+      <input id="pengeluaran" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
+      <label>Bongkaran</label>
+      <input id="bongkaran" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
+      <label>Grand Total</label>
+      <input id="grandTotal" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
+    </div>
+    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+      <h2 class="text-xl font-semibold mb-4">Input Jumlah CHIP HD</h2>
+      <div id="hdInputs"></div>
+    </div>
+    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+      <h2 class="text-xl font-semibold mb-4">Input Jumlah CHIP RD</h2>
+      <div id="rdInputs"></div>
+      <button onclick="hitung()" class="bg-blue-500 hover:bg-blue-600 w-full p-3 rounded-lg font-bold mt-4">Hitung</button>
+    </div>
+  </div>
+  <div id="hasil" class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
+    <h2 class="text-xl font-semibold mb-4">Hasil Rekap</h2>
+    <div id="output" class="space-y-2 text-lg"></div>
+  </div>
+  <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
+    <h2 class="text-xl font-semibold mb-4">Detail Penjualan CHIP RD</h2>
+    <table class="w-full border-collapse border border-gray-700">
+      <thead class="bg-gray-900">
+        <tr>
+          <th class="p-2 border border-gray-700">Jenis</th>
+          <th class="p-2 border border-gray-700">Jumlah</th>
+          <th class="p-2 border border-gray-700">Harga (1k)</th>
+          <th class="p-2 border border-gray-700">Total (ribu)</th>
+        </tr>
+      </thead>
+      <tbody id="chipTable"></tbody>
+    </table>
+  </div>
+</div>
+<script>
+const hd = { "100m": { jumlah: 0, harga: 6 }, "500m": { jumlah: 0, harga: 27 }, "1b": { jumlah: 0, harga: 50 }, "10b": { jumlah: 0, harga: 490 } };
+const rd = { "100m": { jumlah: 0, harga: 7 }, "500m": { jumlah: 0, harga: 35 }, "1b": { jumlah: 0, harga: 65 }, "5b": { jumlah: 0, harga: 320 }, "10b": { jumlah: 0, harga: 630 } };
+const satuanJuta = { "100m": 100, "500m": 500, "1b": 1000, "5b": 5000, "10b": 10000 };
+
+const toRupiah = (n) => n.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+const ribu = (n) => n * 1000;
+const formatTambahan = (n) => (n > 0 ? `+${toRupiah(n)}` : n < 0 ? `-${toRupiah(Math.abs(n))}` : toRupiah(0));
+const hitungTotalChip = (obj) => Object.values(obj).reduce((acc, x) => acc + (x.jumlah * x.harga), 0);
+
+function buatInputChip(containerId, dataObj, prefix) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = Object.keys(dataObj).map(key => `
+    <label class='block mb-1'>${key}</label>
+    <input id='${prefix}_${key}' class='w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3' value='0'>
+  `).join('');
+}
+
+function ambilJumlahChip(dataObj, prefix) {
+  Object.keys(dataObj).forEach(key => {
+    dataObj[key].jumlah = parseInt(document.getElementById(`${prefix}_${key}`).value) || 0;
+  });
+}
+
+function hitung() {
+  ambilJumlahChip(hd, 'hd');
+  ambilJumlahChip(rd, 'rd');
+
+  const input = {
+    saldoAwal: eval(document.getElementById('saldoAwal').value),
+    pulsaVoucher: eval(document.getElementById('pulsaVoucher').value),
+    pengeluaran: eval(document.getElementById('pengeluaran').value),
+    bongkaran: eval(document.getElementById('bongkaran').value),
+    grandTotal: eval(document.getElementById('grandTotal').value)
+  };
+
+  let chipTotal = hitungTotalChip(hd) + hitungTotalChip(rd);
+  let saldoAwal = ribu(input.saldoAwal);
+  let chip = ribu(chipTotal);
+  let pulsaVoucher = ribu(input.pulsaVoucher);
+  let pengeluaran = ribu(input.pengeluaran);
+  let bongkaran = ribu(input.bongkaran);
+  let grandTotal = ribu(input.grandTotal);
+  let jumlahMasuk = saldoAwal + chip + pulsaVoucher;
+  let sisaUang = jumlahMasuk - pengeluaran - bongkaran;
+  let selisih = grandTotal - sisaUang;
+  let totalChipRDbiliar = Object.entries(rd).reduce((t, [k, { jumlah }]) => t + (jumlah * (satuanJuta[k] || 0) / 1000), 0);
+
+  document.getElementById('output').innerHTML = `
+    <p>Saldo Awal: <b>${toRupiah(saldoAwal)}</b></p>
+    <p>Chip Terjual: <b>${toRupiah(chip)}</b></p>
+    <p>Pulsa/Voucher: <b>${toRupiah(pulsaVoucher)}</b></p>
+    <hr class='border-gray-600'>
+    <p>Jumlah Masuk: <b>${toRupiah(jumlahMasuk)}</b></p>
+    <p>Pengeluaran: <b>${toRupiah(pengeluaran)}</b></p>
+    <p>Bongkaran: <b>${toRupiah(bongkaran)}</b></p>
+    <hr class='border-gray-600'>
+    <p>Sisa Uang: <b>${toRupiah(sisaUang)}</b></p>
+    <p>Uang Tersedia: <b>${toRupiah(grandTotal)}</b></p>
+    <p>Selisih: <span class='${selisih < 0 ? "text-red-400" : "text-green-400"}'><b>${formatTambahan(selisih)}</b></span></p>
+    <p>Total CHIP RD: <b>${totalChipRDbiliar.toLocaleString('id-ID')} B</b></p>`;
+
+  document.getElementById('chipTable').innerHTML = Object.entries(rd).map(([k, v]) => `
+    <tr>
+      <td class='border border-gray-700 p-2'>${k}</td>
+      <td class='border border-gray-700 p-2 text-center'>${v.jumlah}</td>
+      <td class='border border-gray-700 p-2 text-center'>${v.harga}</td>
+      <td class='border border-gray-700 p-2 text-right'>${(v.jumlah * v.harga).toLocaleString('id-ID')}k</td>
+    </tr>`).join('');
+
+  saveData(); // simpan data setiap hitung
+}
+
+// === Penyimpanan LocalStorage Selama 1 Jam ===
+const STORAGE_KEY = "rekapChipData";
+const EXPIRY_KEY = "rekapChipExpiry";
+const EXPIRY_TIME = 3600000;
+
+function saveData() {
+  const data = {
+    saldoAwal: document.getElementById('saldoAwal').value,
+    pulsaVoucher: document.getElementById('pulsaVoucher').value,
+    pengeluaran: document.getElementById('pengeluaran').value,
+    bongkaran: document.getElementById('bongkaran').value,
+    grandTotal: document.getElementById('grandTotal').value,
+    hd: {}, rd: {}
+  };
+  Object.keys(hd).forEach(k => data.hd[k] = document.getElementById(`hd_${k}`).value);
+  Object.keys(rd).forEach(k => data.rd[k] = document.getElementById(`rd_${k}`).value);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  localStorage.setItem(EXPIRY_KEY, Date.now());
+}
+
+function loadData() {
+  const expiry = localStorage.getItem(EXPIRY_KEY);
+  if (!expiry || (Date.now() - expiry) > EXPIRY_TIME) {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(EXPIRY_KEY);
+    return;
+  }
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  if (!saved.saldoAwal) return;
+  document.getElementById('saldoAwal').value = saved.saldoAwal;
+  document.getElementById('pulsaVoucher').value = saved.pulsaVoucher;
+  document.getElementById('pengeluaran').value = saved.pengeluaran;
+  document.getElementById('bongkaran').value = saved.bongkaran;
+  document.getElementById('grandTotal').value = saved.grandTotal;
+  Object.keys(saved.hd).forEach(k => document.getElementById(`hd_${k}`).value = saved.hd[k]);
+  Object.keys(saved.rd).forEach(k => document.getElementById(`rd_${k}`).value = saved.rd[k]);
+}
+
+window.onload = () => {
+  buatInputChip('hdInputs', hd, 'hd');
+  buatInputChip('rdInputs', rd, 'rd');
+  setTimeout(loadData, 100); // load setelah input terbuat
+  setTimeout(hitung, 200);
+};
+</script>
+</body>
+</html>
