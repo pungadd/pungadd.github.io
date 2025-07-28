@@ -32,10 +32,13 @@
       <button onclick="hitung()" class="bg-blue-500 hover:bg-blue-600 w-full p-3 rounded-lg font-bold mt-4">Hitung</button>
     </div>
   </div>
+
   <div id="hasil" class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
     <h2 class="text-xl font-semibold mb-4">Hasil Rekap</h2>
     <div id="output" class="space-y-2 text-lg"></div>
   </div>
+
+  <!-- Detail CHIP RD -->
   <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
     <h2 class="text-xl font-semibold mb-4">Detail Penjualan CHIP RD</h2>
     <table class="w-full border-collapse border border-gray-700">
@@ -50,7 +53,24 @@
       <tbody id="chipTable"></tbody>
     </table>
   </div>
+
+  <!-- Detail CHIP HD -->
+  <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
+    <h2 class="text-xl font-semibold mb-4">Detail Penjualan CHIP HD</h2>
+    <table class="w-full border-collapse border border-gray-700">
+      <thead class="bg-gray-900">
+        <tr>
+          <th class="p-2 border border-gray-700">Jenis</th>
+          <th class="p-2 border border-gray-700">Jumlah</th>
+          <th class="p-2 border border-gray-700">Harga (1k)</th>
+          <th class="p-2 border border-gray-700">Total (ribu)</th>
+        </tr>
+      </thead>
+      <tbody id="chipTableHD"></tbody>
+    </table>
+  </div>
 </div>
+
 <script>
 const hd = { "100m": { jumlah: 0, harga: 6 }, "500m": { jumlah: 0, harga: 27 }, "1b": { jumlah: 0, harga: 50 }, "10b": { jumlah: 0, harga: 490 } };
 const rd = { "100m": { jumlah: 0, harga: 7 }, "500m": { jumlah: 0, harga: 35 }, "1b": { jumlah: 0, harga: 65 }, "5b": { jumlah: 0, harga: 320 }, "10b": { jumlah: 0, harga: 630 } };
@@ -113,6 +133,7 @@ function hitung() {
     <p>Selisih: <span class='${selisih < 0 ? "text-red-400" : "text-green-400"}'><b>${formatTambahan(selisih)}</b></span></p>
     <p>Total CHIP RD: <b>${totalChipRDbiliar.toLocaleString('id-ID')} B</b></p>`;
 
+  // Tabel RD
   document.getElementById('chipTable').innerHTML = Object.entries(rd).map(([k, v]) => `
     <tr>
       <td class='border border-gray-700 p-2'>${k}</td>
@@ -121,10 +142,18 @@ function hitung() {
       <td class='border border-gray-700 p-2 text-right'>${(v.jumlah * v.harga).toLocaleString('id-ID')}k</td>
     </tr>`).join('');
 
-  saveData(); // simpan data setiap hitung
+  // 🔹 Tabel HD
+  document.getElementById('chipTableHD').innerHTML = Object.entries(hd).map(([k, v]) => `
+    <tr>
+      <td class='border border-gray-700 p-2'>${k}</td>
+      <td class='border border-gray-700 p-2 text-center'>${v.jumlah}</td>
+      <td class='border border-gray-700 p-2 text-center'>${v.harga}</td>
+      <td class='border border-gray-700 p-2 text-right'>${(v.jumlah * v.harga).toLocaleString('id-ID')}k</td>
+    </tr>`).join('');
+
+  saveData(); 
 }
 
-// === Penyimpanan LocalStorage Selama 1 Jam ===
 const STORAGE_KEY = "rekapChipData";
 const EXPIRY_KEY = "rekapChipExpiry";
 const EXPIRY_TIME = 3600000;
@@ -165,7 +194,7 @@ function loadData() {
 window.onload = () => {
   buatInputChip('hdInputs', hd, 'hd');
   buatInputChip('rdInputs', rd, 'rd');
-  setTimeout(loadData, 100); // load setelah input terbuat
+  setTimeout(loadData, 100);
   setTimeout(hitung, 200);
 };
 </script>
