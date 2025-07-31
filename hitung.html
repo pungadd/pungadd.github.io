@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,10 @@
 <body class="bg-gradient-to-br from-gray-900 to-gray-700 min-h-screen text-white font-sans">
 <div class="max-w-6xl mx-auto py-10 px-5">
   <h1 class="text-3xl font-bold text-center mb-8">💎 Kalkulator Rekap Penjualan Chip</h1>
+
+  <!-- GRID INPUT -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Input Data Keuangan -->
     <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
       <h2 class="text-xl font-semibold mb-4">Input Data Keuangan</h2>
       <label>Saldo Awal (ribu)</label>
@@ -22,10 +26,14 @@
       <label>Grand Total</label>
       <input id="grandTotal" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
     </div>
+
+    <!-- Input CHIP HD -->
     <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
       <h2 class="text-xl font-semibold mb-4">Input Jumlah CHIP HD</h2>
       <div id="hdInputs"></div>
     </div>
+
+    <!-- Input CHIP RD -->
     <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
       <h2 class="text-xl font-semibold mb-4">Input Jumlah CHIP RD</h2>
       <div id="rdInputs"></div>
@@ -33,28 +41,13 @@
     </div>
   </div>
 
+  <!-- Hasil Rekap -->
   <div id="hasil" class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
     <h2 class="text-xl font-semibold mb-4">Hasil Rekap</h2>
     <div id="output" class="space-y-2 text-lg"></div>
   </div>
 
-  <!-- Detail CHIP RD -->
-  <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
-    <h2 class="text-xl font-semibold mb-4">Detail Penjualan CHIP RD</h2>
-    <table class="w-full border-collapse border border-gray-700">
-      <thead class="bg-gray-900">
-        <tr>
-          <th class="p-2 border border-gray-700">Jenis</th>
-          <th class="p-2 border border-gray-700">Jumlah</th>
-          <th class="p-2 border border-gray-700">Harga (1k)</th>
-          <th class="p-2 border border-gray-700">Total (ribu)</th>
-        </tr>
-      </thead>
-      <tbody id="chipTable"></tbody>
-    </table>
-  </div>
-
-  <!-- Detail CHIP HD -->
+  <!-- 🔹 DETAIL CHIP HD (Dipindah ke atas RD) -->
   <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
     <h2 class="text-xl font-semibold mb-4">Detail Penjualan CHIP HD</h2>
     <table class="w-full border-collapse border border-gray-700">
@@ -69,12 +62,45 @@
       <tbody id="chipTableHD"></tbody>
     </table>
   </div>
+
+  <!-- 🔹 DETAIL CHIP RD (Sekarang di bawah HD) -->
+  <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
+    <h2 class="text-xl font-semibold mb-4">Detail Penjualan CHIP RD</h2>
+    <table class="w-full border-collapse border border-gray-700">
+      <thead class="bg-gray-900">
+        <tr>
+          <th class="p-2 border border-gray-700">Jenis</th>
+          <th class="p-2 border border-gray-700">Jumlah</th>
+          <th class="p-2 border border-gray-700">Harga (1k)</th>
+          <th class="p-2 border border-gray-700">Total (ribu)</th>
+        </tr>
+      </thead>
+      <tbody id="chipTable"></tbody>
+    </table>
+  </div>
 </div>
 
 <script>
-const hd = { "100m": { jumlah: 0, harga: 6 }, "500m": { jumlah: 0, harga: 27 }, "1b": { jumlah: 0, harga: 50 }, "10b": { jumlah: 0, harga: 490 } };
-const rd = { "100m": { jumlah: 0, harga: 7 }, "500m": { jumlah: 0, harga: 35 }, "1b": { jumlah: 0, harga: 65 }, "5b": { jumlah: 0, harga: 320 }, "6b": { jumlah: 0, harga: 384 }, "10b": { jumlah: 0, harga: 630 } };
-const satuanJuta = { "100m": 100, "500m": 500, "1b": 1000, "5b": 5000, "6b": 6000, "10b": 10000 };
+const hd = {
+  "100m": { jumlah: 0, harga: 6 },
+  "500m": { jumlah: 0, harga: 27 },
+  "1b": { jumlah: 0, harga: 53 },
+  "10b": { jumlah: 0, harga: 520 }
+};
+const rd = {
+  "100m": { jumlah: 0, harga: 7 },
+  "500m": { jumlah: 0, harga: 35 },
+  "1b": { jumlah: 0, harga: 65 },
+  "5b": { jumlah: 0, harga: 320 },
+  "10b": { jumlah: 0, harga: 630 }
+};
+const satuanJuta = {
+  "100m": 100,
+  "500m": 500,
+  "1b": 1000,
+  "5b": 5000,
+  "10b": 10000
+};
 
 const toRupiah = (n) => n.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
 const ribu = (n) => n * 1000;
@@ -82,8 +108,7 @@ const formatTambahan = (n) => (n > 0 ? `+${toRupiah(n)}` : n < 0 ? `-${toRupiah(
 const hitungTotalChip = (obj) => Object.values(obj).reduce((acc, x) => acc + (x.jumlah * x.harga), 0);
 
 function buatInputChip(containerId, dataObj, prefix) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = Object.keys(dataObj).map(key => `
+  document.getElementById(containerId).innerHTML = Object.keys(dataObj).map(key => `
     <label class='block mb-1'>${key}</label>
     <input id='${prefix}_${key}' class='w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3' value='0'>
   `).join('');
@@ -133,6 +158,15 @@ function hitung() {
     <p>Selisih: <span class='${selisih < 0 ? "text-red-400" : "text-green-400"}'><b>${formatTambahan(selisih)}</b></span></p>
     <p>Total CHIP RD: <b>${totalChipRDbiliar.toLocaleString('id-ID')} B</b></p>`;
 
+  // Tabel HD
+  document.getElementById('chipTableHD').innerHTML = Object.entries(hd).map(([k, v]) => `
+    <tr>
+      <td class='border border-gray-700 p-2'>${k}</td>
+      <td class='border border-gray-700 p-2 text-center'>${v.jumlah}</td>
+      <td class='border border-gray-700 p-2 text-center'>${v.harga}</td>
+      <td class='border border-gray-700 p-2 text-right'>${(v.jumlah * v.harga).toLocaleString('id-ID')}k</td>
+    </tr>`).join('');
+
   // Tabel RD
   document.getElementById('chipTable').innerHTML = Object.entries(rd).map(([k, v]) => `
     <tr>
@@ -142,16 +176,7 @@ function hitung() {
       <td class='border border-gray-700 p-2 text-right'>${(v.jumlah * v.harga).toLocaleString('id-ID')}k</td>
     </tr>`).join('');
 
-  // 🔹 Tabel HD
-  document.getElementById('chipTableHD').innerHTML = Object.entries(hd).map(([k, v]) => `
-    <tr>
-      <td class='border border-gray-700 p-2'>${k}</td>
-      <td class='border border-gray-700 p-2 text-center'>${v.jumlah}</td>
-      <td class='border border-gray-700 p-2 text-center'>${v.harga}</td>
-      <td class='border border-gray-700 p-2 text-right'>${(v.jumlah * v.harga).toLocaleString('id-ID')}k</td>
-    </tr>`).join('');
-
-  saveData(); 
+  saveData();
 }
 
 const STORAGE_KEY = "rekapChipData";
@@ -159,14 +184,7 @@ const EXPIRY_KEY = "rekapChipExpiry";
 const EXPIRY_TIME = 3600000;
 
 function saveData() {
-  const data = {
-    saldoAwal: document.getElementById('saldoAwal').value,
-    pulsaVoucher: document.getElementById('pulsaVoucher').value,
-    pengeluaran: document.getElementById('pengeluaran').value,
-    bongkaran: document.getElementById('bongkaran').value,
-    grandTotal: document.getElementById('grandTotal').value,
-    hd: {}, rd: {}
-  };
+  const data = { saldoAwal: saldoAwal.value, pulsaVoucher: pulsaVoucher.value, pengeluaran: pengeluaran.value, bongkaran: bongkaran.value, grandTotal: grandTotal.value, hd: {}, rd: {} };
   Object.keys(hd).forEach(k => data.hd[k] = document.getElementById(`hd_${k}`).value);
   Object.keys(rd).forEach(k => data.rd[k] = document.getElementById(`rd_${k}`).value);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -175,28 +193,15 @@ function saveData() {
 
 function loadData() {
   const expiry = localStorage.getItem(EXPIRY_KEY);
-  if (!expiry || (Date.now() - expiry) > EXPIRY_TIME) {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(EXPIRY_KEY);
-    return;
-  }
+  if (!expiry || (Date.now() - expiry) > EXPIRY_TIME) { localStorage.removeItem(STORAGE_KEY); return; }
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
   if (!saved.saldoAwal) return;
-  document.getElementById('saldoAwal').value = saved.saldoAwal;
-  document.getElementById('pulsaVoucher').value = saved.pulsaVoucher;
-  document.getElementById('pengeluaran').value = saved.pengeluaran;
-  document.getElementById('bongkaran').value = saved.bongkaran;
-  document.getElementById('grandTotal').value = saved.grandTotal;
+  saldoAwal.value = saved.saldoAwal; pulsaVoucher.value = saved.pulsaVoucher; pengeluaran.value = saved.pengeluaran; bongkaran.value = saved.bongkaran; grandTotal.value = saved.grandTotal;
   Object.keys(saved.hd).forEach(k => document.getElementById(`hd_${k}`).value = saved.hd[k]);
   Object.keys(saved.rd).forEach(k => document.getElementById(`rd_${k}`).value = saved.rd[k]);
 }
 
-window.onload = () => {
-  buatInputChip('hdInputs', hd, 'hd');
-  buatInputChip('rdInputs', rd, 'rd');
-  setTimeout(loadData, 100);
-  setTimeout(hitung, 200);
-};
+window.onload = () => { buatInputChip('hdInputs', hd, 'hd'); buatInputChip('rdInputs', rd, 'rd'); setTimeout(loadData, 100); setTimeout(hitung, 200); };
 </script>
 </body>
 </html>
