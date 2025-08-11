@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="id"><head>
+<!DOCTYPE html>
+<html lang="id">
+<head>
   <meta charset="UTF-8">
   <title>Form Bongkar GRECEP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -57,7 +59,8 @@
     </div>
     <div class="card-body">
       <h4 class="text-center mb-3" style="color: #007bff;">
-        Form Bongkar GRECEP     </h4>
+        Form Bongkar GRECEP
+      </h4>
       <div class="alert alert-info">Proses minimal 1-3 menit setelah pemesanan</div>
       <form id="bongkarForm">
         <div class="mb-4 text-center">
@@ -66,7 +69,7 @@
             <span class="input-group-text bg-primary text-white">
               <i class="bi bi-hash"></i>
             </span>
-            <input type="text" id="iddomino" class="form-control border-primary fw-semibold fs-5 text-center" value="207207" readonly="">
+            <input type="text" id="iddomino" class="form-control border-primary fw-semibold fs-5 text-center" value="26321555" readonly="">
             <button class="btn btn-outline-primary" type="button" id="copyIdBtn" title="Salin ID">
               <i class="bi bi-clipboard"></i>
             </button>
@@ -90,10 +93,10 @@
           <input type="text" id="id" class="form-control" placeholder="ID Game" required="">
         </div>
 
-        <small class="text-muted d-block mb-1">Jumlah Bongkar Chip (min. 1B):</small>
+        <small class="text-muted d-block mb-1">Jumlah Bongkar Chip (min. 500M):</small>
         <div class="mb-1 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-coin" style="color: #007bff;"></i></span>
-          <input type="text" id="jumlah" class="form-control" placeholder="Contoh: 1B atau 2B" required="">
+          <input type="text" id="jumlah" class="form-control" placeholder="Contoh: 500M, 1B, 1.5B" required="">
         </div>
         <div id="error" class="text-danger small mb-1"></div>
 
@@ -108,7 +111,6 @@
           <input type="text" id="bank" class="form-control" placeholder="Bank & Wallet" required="">
         </div>
 
-        <!-- Tambahan Nama Rekening -->
         <div class="mb-3 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-person-lines-fill" style="color: #007bff;"></i></span>
           <input type="text" id="namarekening" class="form-control" placeholder="Nama Pemilik Rekening" required="">
@@ -130,8 +132,8 @@
   </div>
 
   <script>
-    const pricingM = {"500":30000,"600":35000,"700":40000,"800":45000,"900":50000};
-    const rateB    = 60000;
+    const ratePerHalfB = 29000; // Harga 500M
+    const minHalfB = 0.5;       // Minimal 0.5B
     const template = `💰 *Mohon masukan permintaan anda*
 
 📅 *Tanggal:* {tanggal}
@@ -161,30 +163,50 @@ TERIMA KASIH 🙏🏻 `;
       const v = jumlahEl.value.trim().toUpperCase();
       errorEl.textContent = '';
       estimasiEl.value = '';
+      let jumlahB = null;
 
       if (v.endsWith('M')) {
-        const num = parseInt(v.slice(0, -1), 10);
-        if (isNaN(num) || num < 1000) {
-          errorEl.textContent = 'Minimal bongkar 1B (1000M)';
-        } else if (pricingM[num]) {
-          estimasiEl.value = 'Rp ' + pricingM[num].toLocaleString('id-ID');
-        } else {
-          errorEl.textContent = 'Pilih M = ' + Object.keys(pricingM).join(',');
+        const numM = parseInt(v.slice(0, -1), 10);
+        if (isNaN(numM) || numM < 500) {
+          errorEl.textContent = 'Minimal bongkar 500M (0.5B)';
+          return;
         }
-      } else if (v.endsWith('B')) {
-        const num = parseInt(v.slice(0, -1), 10);
-        if (!isNaN(num) && num >= 1) {
-          estimasiEl.value = 'Rp ' + (num * rateB).toLocaleString('id-ID');
-        } else {
-          errorEl.textContent = 'Minimal bongkar 1B';
+        if (numM % 500 !== 0) {
+          errorEl.textContent = 'Harus kelipatan 500M';
+          return;
         }
-      } else if (v !== '') {
-        errorEl.textContent = 'Gunakan format "1000M" atau "1B"';
+        jumlahB = numM / 1000;
+      }
+      else if (v.endsWith('B')) {
+        const numB = parseFloat(v.slice(0, -1).replace(',', '.'));
+        if (isNaN(numB) || numB < minHalfB) {
+          errorEl.textContent = 'Minimal bongkar 0.5B (500M)';
+          return;
+        }
+        if ((numB * 10) % 5 !== 0) {
+          errorEl.textContent = 'Harus kelipatan 0.5B';
+          return;
+        }
+        jumlahB = numB;
+      }
+      else if (v !== '') {
+        errorEl.textContent = 'Gunakan format "500M" atau "1B"';
+        return;
+      }
+
+      if (jumlahB !== null) {
+        const totalHalfB = jumlahB / 0.5;
+        const harga = totalHalfB * ratePerHalfB;
+        estimasiEl.value = 'Rp ' + harga.toLocaleString('id-ID');
       }
     });
 
     document.getElementById('bongkarForm').addEventListener('submit', async e => {
       e.preventDefault();
+      if (!estimasiEl.value) {
+        errorEl.textContent = 'Masukkan jumlah bongkar yang valid terlebih dahulu';
+        return;
+      }
       const id = idEl.value.trim();
       const jumlah = jumlahEl.value.trim().toUpperCase();
       const bank = bankEl.value.trim();
@@ -192,7 +214,6 @@ TERIMA KASIH 🙏🏻 `;
       const rekening = rekeningEl.value.trim();
       const iddomino = IDKAMIel.value.trim();
       const wa = waEl.value.trim();
-      const estimasi = estimasiEl.value.replace(/[^0-9]/g, '');
       const now = new Date();
       const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
       const tanggal = `${now.getDate()} ${bulan[now.getMonth()]} ${now.getFullYear()}, ${String(now.getHours()).padStart(2,'0')}.${String(now.getMinutes()).padStart(2,'0')}`;
@@ -200,7 +221,7 @@ TERIMA KASIH 🙏🏻 `;
       await fetch('?log=1', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ id, jumlah, bank, namarekening, rekening, iddomino, wa, estimasi })
+        body: JSON.stringify({ id, jumlah, bank, namarekening, rekening, iddomino, wa, estimasi: estimasiEl.value })
       });
 
       let msg = template
@@ -217,6 +238,5 @@ TERIMA KASIH 🙏🏻 `;
       window.location.href = `https://api.whatsapp.com/send?phone=${merchant}&text=${encodeURIComponent(msg)}`;
     });
   </script>
-
-
-</body></html>
+</body>
+</html>
