@@ -63,6 +63,8 @@
       </h4>
       <div class="alert alert-info">Proses minimal 1-3 menit setelah pemesanan</div>
       <form id="bongkarForm">
+        
+        <!-- ID Bongkar Kami -->
         <div class="mb-4 text-center">
           <label class="form-label fw-bold text-uppercase d-block">ID Bongkar Kami</label>
           <div class="input-group justify-content-center mx-auto" style="max-width: 320px;">
@@ -77,22 +79,13 @@
           <div id="copyFeedback" class="form-text text-success mt-2" style="display:none;">✅ ID berhasil disalin!</div>
         </div>
 
-        <script>
-          document.getElementById('copyIdBtn').addEventListener('click', () => {
-            const input = document.getElementById('iddomino');
-            navigator.clipboard.writeText(input.value).then(() => {
-              const fb = document.getElementById('copyFeedback');
-              fb.style.display = 'block';
-              setTimeout(() => fb.style.display = 'none', 2000);
-            });
-          });
-        </script>
-
+        <!-- ID Game -->
         <div class="mb-3 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-joystick" style="color: #007bff;"></i></span>
           <input type="text" id="id" class="form-control" placeholder="ID Game" required="">
         </div>
 
+        <!-- Jumlah Bongkar -->
         <small class="text-muted d-block mb-1">Jumlah Bongkar Chip (min. 500M):</small>
         <div class="mb-1 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-coin" style="color: #007bff;"></i></span>
@@ -100,27 +93,32 @@
         </div>
         <div id="error" class="text-danger small mb-1"></div>
 
+        <!-- Estimasi Dana -->
         <small class="text-muted d-block">Estimasi Dana Didapat:</small>
         <div class="mb-4 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-wallet2" style="color: #007bff;"></i></span>
           <input type="text" id="estimasi" class="form-control" placeholder="Rp 0" readonly="">
         </div>
 
+        <!-- Bank -->
         <div class="mb-3 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-bank" style="color: #007bff;"></i></span>
           <input type="text" id="bank" class="form-control" placeholder="Bank & Wallet" required="">
         </div>
 
+        <!-- Nama Pemilik Rekening -->
         <div class="mb-3 input-group">
-          <span class="input-group-text bg-white"><i class="bi bi-person-lines-fill" style="color: #007bff;"></i></span>
+          <span class="input-group-text bg-white"><i class="bi bi-person" style="color: #007bff;"></i></span>
           <input type="text" id="namarekening" class="form-control" placeholder="Nama Pemilik Rekening" required="">
         </div>
 
+        <!-- Nomor Rekening -->
         <div class="mb-3 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-credit-card-2-front" style="color: #007bff;"></i></span>
           <input type="text" id="rekening" class="form-control" placeholder="No. Rekening" required="">
         </div>
 
+        <!-- WhatsApp -->
         <div class="mb-4 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-whatsapp" style="color: #007bff;"></i></span>
           <input type="text" id="wa" class="form-control" placeholder="Nomor WhatsApp Anda" required="">
@@ -132,8 +130,18 @@
   </div>
 
   <script>
-    const ratePerHalfB = 29000; // Harga per 0.5B
-    const minHalfB = 0.5;       // Minimal 0.5B
+    // Salin ID Bongkar
+    document.getElementById('copyIdBtn').addEventListener('click', () => {
+      const input = document.getElementById('iddomino');
+      navigator.clipboard.writeText(input.value).then(() => {
+        const fb = document.getElementById('copyFeedback');
+        fb.style.display = 'block';
+        setTimeout(() => fb.style.display = 'none', 2000);
+      });
+    });
+
+    const ratePerHalfB = 29000; 
+    const minHalfB = 0.5;       
     const template = `💰 *Mohon masukan permintaan anda*
 
 📅 *Tanggal:* {tanggal}
@@ -166,8 +174,7 @@ TERIMA KASIH 🙏🏻 `;
       let jumlahB = null;
 
       if (v.endsWith('M')) {
-        const clean = v.slice(0, -1).replace(/\./g, '');
-        const numM = parseInt(clean, 10);
+        const numM = parseInt(v.slice(0, -1), 10);
         if (isNaN(numM) || numM < 500) {
           errorEl.textContent = 'Minimal bongkar 500M (0.5B)';
           return;
@@ -179,8 +186,7 @@ TERIMA KASIH 🙏🏻 `;
         jumlahB = numM / 1000;
       }
       else if (v.endsWith('B')) {
-        const clean = v.slice(0, -1).replace(/\./g, '').replace(',', '.');
-        const numB = parseFloat(clean);
+        const numB = parseFloat(v.slice(0, -1).replace(',', '.'));
         if (isNaN(numB) || numB < minHalfB) {
           errorEl.textContent = 'Minimal bongkar 0.5B (500M)';
           return;
@@ -197,10 +203,10 @@ TERIMA KASIH 🙏🏻 `;
       }
 
       if (jumlahB !== null) {
-        const fullB = Math.floor(jumlahB);        // bagian bulat
-        const sisaB = jumlahB - fullB;            // sisa pecahan
-        let harga = fullB * 59000;                 // harga untuk B penuh
-        harga += (sisaB / 0.5) * 29000;           // harga untuk kelipatan 0.5B
+        const fullB = Math.floor(jumlahB);        
+        const sisaB = jumlahB - fullB;            
+        let harga = fullB * 59000;                 
+        harga += (sisaB / 0.5) * 29000;           
         estimasiEl.value = 'Rp ' + harga.toLocaleString('id-ID');
       }
     });
@@ -243,4 +249,4 @@ TERIMA KASIH 🙏🏻 `;
     });
   </script>
 </body>
-              </html>
+  </html>
