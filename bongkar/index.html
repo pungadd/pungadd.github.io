@@ -81,22 +81,33 @@
         </div>
 
         <!-- ID Game -->
-        <div class="mb-3 input-group">
-          <span class="input-group-text bg-white"><i class="bi bi-controller" style="color: #007bff;"></i></span>
-          <input type="text" id="id" class="form-control" placeholder="ID Game" required>
+        <div class="mb-3">
+          <label class="form-label fw-bold">ID Game</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-controller" style="color: #007bff;"></i></span>
+            <input type="text" id="id" class="form-control" placeholder="ID Game" required>
+          </div>
         </div>
 
         <!-- Jumlah Bongkar -->
-        <div class="mb-1 input-group">
-          <span class="input-group-text bg-white"><i class="bi bi-coin" style="color: #007bff;"></i></span>
-          <input type="text" id="jumlah" class="form-control" placeholder="Contoh: 500M, 1B, 1.5B" required>
+        <div class="mb-1">
+          <label class="form-label fw-bold">Jumlah Bongkar Chip (min. 500M):</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-coin" style="color: #007bff;"></i></span>
+            <input type="text" id="jumlah" class="form-control" placeholder="Contoh: 500M, 1B, 1.5B" required>
+          </div>
+          <small class="text-muted d-block mb-2">Minimal bongkar 500M (0.5B) • Kelipatan 500M</small>
         </div>
         <div id="error" class="text-danger small mb-1"></div>
 
         <!-- Estimasi Dana -->
-        <div class="mb-4 input-group">
-          <span class="input-group-text bg-white"><i class="bi bi-wallet2" style="color: #007bff;"></i></span>
-          <input type="text" id="estimasi" class="form-control" placeholder="Rp 0" readonly>
+        <div class="mb-4">
+          <label class="form-label fw-bold">Estimasi Dana Didapat:</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-wallet2" style="color: #007bff;"></i></span>
+            <input type="text" id="estimasi" class="form-control" placeholder="Rp 0" readonly>
+          </div>
+          <small class="text-muted d-block mb-3">Estimasi ini adalah jumlah saldo yang akan Anda terima.</small>
         </div>
 
         <!-- Bank -->
