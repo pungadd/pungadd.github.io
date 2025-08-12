@@ -132,7 +132,7 @@
   </div>
 
   <script>
-    const ratePerHalfB = 29000; // Harga 500M
+    const ratePerHalfB = 29000; // Harga per 0.5B
     const minHalfB = 0.5;       // Minimal 0.5B
     const template = `💰 *Mohon masukan permintaan anda*
 
@@ -195,7 +195,7 @@ TERIMA KASIH 🙏🏻 `;
       }
 
       if (jumlahB !== null) {
-        const totalHalfB = jumlahB / 0.5;
+        const totalHalfB = Math.round(jumlahB / 0.5); // hitung kelipatan 0.5B
         const harga = totalHalfB * ratePerHalfB;
         estimasiEl.value = 'Rp ' + harga.toLocaleString('id-ID');
       }
