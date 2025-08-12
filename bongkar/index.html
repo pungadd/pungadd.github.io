@@ -71,7 +71,7 @@
             <span class="input-group-text bg-primary text-white">
               <i class="bi bi-hash"></i>
             </span>
-            <input type="text" id="iddomino" class="form-control border-primary fw-semibold fs-5 text-center" value="26321555" readonly="">
+            <input type="text" id="iddomino" class="form-control border-primary fw-semibold fs-5 text-center" value="26321555" readonly>
             <button class="btn btn-outline-primary" type="button" id="copyIdBtn" title="Salin ID">
               <i class="bi bi-clipboard"></i>
             </button>
@@ -81,47 +81,45 @@
 
         <!-- ID Game -->
         <div class="mb-3 input-group">
-          <span class="input-group-text bg-white"><i class="bi bi-joystick" style="color: #007bff;"></i></span>
-          <input type="text" id="id" class="form-control" placeholder="ID Game" required="">
+          <span class="input-group-text bg-white"><i class="bi bi-controller" style="color: #007bff;"></i></span>
+          <input type="text" id="id" class="form-control" placeholder="ID Game" required>
         </div>
 
         <!-- Jumlah Bongkar -->
-        <small class="text-muted d-block mb-1">Jumlah Bongkar Chip (min. 500M):</small>
         <div class="mb-1 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-coin" style="color: #007bff;"></i></span>
-          <input type="text" id="jumlah" class="form-control" placeholder="Contoh: 500M, 1B, 1.5B" required="">
+          <input type="text" id="jumlah" class="form-control" placeholder="Contoh: 500M, 1B, 1.5B" required>
         </div>
         <div id="error" class="text-danger small mb-1"></div>
 
         <!-- Estimasi Dana -->
-        <small class="text-muted d-block">Estimasi Dana Didapat:</small>
         <div class="mb-4 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-wallet2" style="color: #007bff;"></i></span>
-          <input type="text" id="estimasi" class="form-control" placeholder="Rp 0" readonly="">
+          <input type="text" id="estimasi" class="form-control" placeholder="Rp 0" readonly>
         </div>
 
         <!-- Bank -->
         <div class="mb-3 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-bank" style="color: #007bff;"></i></span>
-          <input type="text" id="bank" class="form-control" placeholder="Bank & Wallet" required="">
+          <input type="text" id="bank" class="form-control" placeholder="Bank & Wallet" required>
         </div>
 
-        <!-- Nama Pemilik Rekening -->
+        <!-- Nama Rekening -->
         <div class="mb-3 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-person" style="color: #007bff;"></i></span>
-          <input type="text" id="namarekening" class="form-control" placeholder="Nama Pemilik Rekening" required="">
+          <input type="text" id="namarekening" class="form-control" placeholder="Nama Pemilik Rekening" required>
         </div>
 
         <!-- Nomor Rekening -->
         <div class="mb-3 input-group">
-          <span class="input-group-text bg-white"><i class="bi bi-credit-card-2-front" style="color: #007bff;"></i></span>
-          <input type="text" id="rekening" class="form-control" placeholder="No. Rekening" required="">
+          <span class="input-group-text bg-white"><i class="bi bi-credit-card" style="color: #007bff;"></i></span>
+          <input type="text" id="rekening" class="form-control" placeholder="No. Rekening" required>
         </div>
 
         <!-- WhatsApp -->
         <div class="mb-4 input-group">
           <span class="input-group-text bg-white"><i class="bi bi-whatsapp" style="color: #007bff;"></i></span>
-          <input type="text" id="wa" class="form-control" placeholder="Nomor WhatsApp Anda" required="">
+          <input type="text" id="wa" class="form-control" placeholder="Nomor WhatsApp Anda" required>
         </div>
 
         <button type="submit" class="btn btn-bongkar w-100 py-2">Kirim Permintaan Bongkar</button>
@@ -130,7 +128,7 @@
   </div>
 
   <script>
-    // Salin ID Bongkar
+    // Copy ID button
     document.getElementById('copyIdBtn').addEventListener('click', () => {
       const input = document.getElementById('iddomino');
       navigator.clipboard.writeText(input.value).then(() => {
@@ -140,8 +138,8 @@
       });
     });
 
-    const ratePerHalfB = 29000; 
-    const minHalfB = 0.5;       
+    const ratePerHalfB = 29000; // Harga per 0.5B
+    const minHalfB = 0.5;       // Minimal 0.5B
     const template = `💰 *Mohon masukan permintaan anda*
 
 📅 *Tanggal:* {tanggal}
@@ -203,10 +201,8 @@ TERIMA KASIH 🙏🏻 `;
       }
 
       if (jumlahB !== null) {
-        const fullB = Math.floor(jumlahB);        
-        const sisaB = jumlahB - fullB;            
-        let harga = fullB * 59000;                 
-        harga += (sisaB / 0.5) * 29000;           
+        const totalHalfB = jumlahB / 0.5; // hitung kelipatan 0.5B
+        const harga = totalHalfB * ratePerHalfB;
         estimasiEl.value = 'Rp ' + harga.toLocaleString('id-ID');
       }
     });
@@ -249,4 +245,4 @@ TERIMA KASIH 🙏🏻 `;
     });
   </script>
 </body>
-  </html>
+</html>
