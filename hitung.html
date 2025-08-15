@@ -47,7 +47,7 @@
     <div id="output" class="space-y-2 text-lg"></div>
   </div>
 
-  <!-- 🔹 DETAIL CHIP HD (Dipindah ke atas RD) -->
+  <!-- DETAIL CHIP HD -->
   <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
     <h2 class="text-xl font-semibold mb-4">Detail Penjualan CHIP HD</h2>
     <table class="w-full border-collapse border border-gray-700">
@@ -63,7 +63,7 @@
     </table>
   </div>
 
-  <!-- 🔹 DETAIL CHIP RD (Sekarang di bawah HD) -->
+  <!-- DETAIL CHIP RD -->
   <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
     <h2 class="text-xl font-semibold mb-4">Detail Penjualan CHIP RD</h2>
     <table class="w-full border-collapse border border-gray-700">
@@ -92,7 +92,7 @@ const rd = {
   "500m": { jumlah: 0, harga: 35 },
   "1b": { jumlah: 0, harga: 65 },
   "5b": { jumlah: 0, harga: 320 },
-  "6b": { jumlah:0, harga: 384 },
+  "6b": { jumlah: 0, harga: 384 },
   "10b": { jumlah: 0, harga: 630 }
 };
 const satuanJuta = {
@@ -100,6 +100,7 @@ const satuanJuta = {
   "500m": 500,
   "1b": 1000,
   "5b": 5000,
+  "6b": 6000,
   "10b": 10000
 };
 
@@ -143,6 +144,9 @@ function hitung() {
   let jumlahMasuk = saldoAwal + chip + pulsaVoucher;
   let sisaUang = jumlahMasuk - pengeluaran - bongkaran;
   let selisih = grandTotal - sisaUang;
+
+  // Total CHIP HD & RD dalam B
+  let totalChipHDbiliar = Object.entries(hd).reduce((t, [k, { jumlah }]) => t + (jumlah * (satuanJuta[k] || 0) / 1000), 0);
   let totalChipRDbiliar = Object.entries(rd).reduce((t, [k, { jumlah }]) => t + (jumlah * (satuanJuta[k] || 0) / 1000), 0);
 
   document.getElementById('output').innerHTML = `
@@ -157,6 +161,7 @@ function hitung() {
     <p>Sisa Uang: <b>${toRupiah(sisaUang)}</b></p>
     <p>Uang Tersedia: <b>${toRupiah(grandTotal)}</b></p>
     <p>Selisih: <span class='${selisih < 0 ? "text-red-400" : "text-green-400"}'><b>${formatTambahan(selisih)}</b></span></p>
+    <p>Total CHIP HD: <b>${totalChipHDbiliar.toLocaleString('id-ID')} B</b></p>
     <p>Total CHIP RD: <b>${totalChipRDbiliar.toLocaleString('id-ID')} B</b></p>`;
 
   // Tabel HD
