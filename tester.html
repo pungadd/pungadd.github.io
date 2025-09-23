@@ -1,214 +1,150 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kalkulator Rekap Penjualan Chip</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-br from-gray-900 to-gray-700 min-h-screen text-white font-sans">
-<div class="max-w-6xl mx-auto py-10 px-5">
-  <h1 class="text-3xl font-bold text-center mb-8">💎 Kalkulator Rekap Penjualan Chip</h1>
-
-  <!-- GRID INPUT -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <!-- Input Data Keuangan -->
-    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-      <h2 class="text-xl font-semibold mb-4">Input Data Keuangan</h2>
-      <label>Saldo Awal (ribu)</label>
-      <input id="saldoAwal" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
-      <label>Pulsa Voucher</label>
-      <input id="pulsaVoucher" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
-      <label>Pengeluaran</label>
-      <input id="pengeluaran" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
-      <label>Bongkaran</label>
-      <input id="bongkaran" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
-      <label>Grand Total</label>
-      <input id="grandTotal" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
-    </div>
-
-    <!-- Input CHIP HD -->
-    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-      <h2 class="text-xl font-semibold mb-4">Input Jumlah CHIP HD</h2>
-      <div id="hdInputs"></div>
-    </div>
-
-    <!-- Input CHIP RD -->
-    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
-      <h2 class="text-xl font-semibold mb-4">Input Jumlah CHIP RD</h2>
-      <div id="rdInputs"></div>
-      <button onclick="hitung()" class="bg-blue-500 hover:bg-blue-600 w-full p-3 rounded-lg font-bold mt-4">Hitung</button>
-    </div>
-  </div>
-
-  <!-- Hasil Rekap -->
-  <div id="hasil" class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
-    <h2 class="text-xl font-semibold mb-4">Hasil Rekap</h2>
-    <div id="output" class="space-y-2 text-lg"></div>
-  </div>
-
-  <!-- DETAIL CHIP HD -->
-  <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
-    <h2 class="text-xl font-semibold mb-4">Detail Penjualan CHIP HD</h2>
-    <table class="w-full border-collapse border border-gray-700">
-      <thead class="bg-gray-900">
-        <tr>
-          <th class="p-2 border border-gray-700">Jenis</th>
-          <th class="p-2 border border-gray-700">Jumlah</th>
-          <th class="p-2 border border-gray-700">Harga (1k)</th>
-          <th class="p-2 border border-gray-700">Total (ribu)</th>
-        </tr>
-      </thead>
-      <tbody id="chipTableHD"></tbody>
-    </table>
-  </div>
-
-  <!-- DETAIL CHIP RD -->
-  <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
-    <h2 class="text-xl font-semibold mb-4">Detail Penjualan CHIP RD</h2>
-    <table class="w-full border-collapse border border-gray-700">
-      <thead class="bg-gray-900">
-        <tr>
-          <th class="p-2 border border-gray-700">Jenis</th>
-          <th class="p-2 border border-gray-700">Jumlah</th>
-          <th class="p-2 border border-gray-700">Harga (1k)</th>
-          <th class="p-2 border border-gray-700">Total (ribu)</th>
-        </tr>
-      </thead>
-      <tbody id="chipTable"></tbody>
-    </table>
-  </div>
-</div>
-
-<script>
-const hd = {
-  "100m": { jumlah: 0, harga: 6 },
-  "500m": { jumlah: 0, harga: 30 },
-  "1b": { jumlah: 0, harga: 58 },
-  "paket": { jumlah: 0, harga: 57 } // harga diskon per 1B
-};
-const rd = {
-  "100m": { jumlah: 0, harga: 7 },
-  "500m": { jumlah: 0, harga: 35 },
-  "1b": { jumlah: 0, harga: 65 },
-  "paket": { jumlah: 0, harga: 64 } // harga diskon per 1B
-};
-const satuanJuta = {
-  "100m": 100,
-  "500m": 500,
-  "1b": 1000,
-  "paket": 1000 // tiap 1 input = 1B
-};
-
-const toRupiah = (n) => n.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
-const ribu = (n) => n * 1000;
-const formatTambahan = (n) => (n > 0 ? `+${toRupiah(n)}` : n < 0 ? `-${toRupiah(Math.abs(n))}` : toRupiah(0));
-const hitungTotalChip = (obj) => Object.values(obj).reduce((acc, x) => acc + (x.jumlah * x.harga), 0);
-
-function buatInputChip(containerId, dataObj, prefix) {
-  document.getElementById(containerId).innerHTML = Object.keys(dataObj).map(key => `
-    <label class='block mb-1'>${key}</label>
-    <input id='${prefix}_${key}' class='w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3' value='0'>
-  `).join('');
-}
-
-function ambilJumlahChip(dataObj, prefix) {
-  Object.keys(dataObj).forEach(key => {
-    let val = parseInt(document.getElementById(`${prefix}_${key}`).value) || 0;
-    if (key === "paket" && val < 10) {
-      dataObj[key].jumlah = 0; // tolak jika < 10B
-    } else {
-      dataObj[key].jumlah = val;
+  <title>Hitung Chip</title>
+  <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 5px;
+      text-align: center;
     }
-  });
-}
+    #warningBox {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ff4d4d;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      z-index: 9999;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <h2>Hitung Chip</h2>
 
-function hitung() {
-  ambilJumlahChip(hd, 'hd');
-  ambilJumlahChip(rd, 'rd');
-
-  const input = {
-    saldoAwal: eval(document.getElementById('saldoAwal').value),
-    pulsaVoucher: eval(document.getElementById('pulsaVoucher').value),
-    pengeluaran: eval(document.getElementById('pengeluaran').value),
-    bongkaran: eval(document.getElementById('bongkaran').value),
-    grandTotal: eval(document.getElementById('grandTotal').value)
-  };
-
-  let chipTotal = hitungTotalChip(hd) + hitungTotalChip(rd);
-  let saldoAwal = ribu(input.saldoAwal);
-  let chip = ribu(chipTotal);
-  let pulsaVoucher = ribu(input.pulsaVoucher);
-  let pengeluaran = ribu(input.pengeluaran);
-  let bongkaran = ribu(input.bongkaran);
-  let grandTotal = ribu(input.grandTotal);
-  let jumlahMasuk = saldoAwal + chip + pulsaVoucher;
-  let sisaUang = jumlahMasuk - pengeluaran - bongkaran;
-  let selisih = grandTotal - sisaUang;
-
-  // Total CHIP HD & RD dalam B
-  let totalChipHDbiliar = Object.entries(hd).reduce((t, [k, { jumlah }]) => t + (jumlah * (satuanJuta[k] || 0) / 1000), 0);
-  let totalChipRDbiliar = Object.entries(rd).reduce((t, [k, { jumlah }]) => t + (jumlah * (satuanJuta[k] || 0) / 1000), 0);
-
-  document.getElementById('output').innerHTML = `
-    <p>Saldo Awal: <b>${toRupiah(saldoAwal)}</b></p>
-    <p>Chip Terjual: <b>${toRupiah(chip)}</b></p>
-    <p>Pulsa/Voucher: <b>${toRupiah(pulsaVoucher)}</b></p>
-    <hr class='border-gray-600'>
-    <p>Jumlah Masuk: <b>${toRupiah(jumlahMasuk)}</b></p>
-    <p>Pengeluaran: <b>${toRupiah(pengeluaran)}</b></p>
-    <p>Bongkaran: <b>${toRupiah(bongkaran)}</b></p>
-    <hr class='border-gray-600'>
-    <p>Sisa Uang: <b>${toRupiah(sisaUang)}</b></p>
-    <p>Uang Tersedia: <b>${toRupiah(grandTotal)}</b></p>
-    <p>Selisih: <span class='${selisih < 0 ? "text-red-400" : "text-green-400"}'><b>${formatTambahan(selisih)}</b></span></p>
-    <p>Total CHIP HD: <b>${totalChipHDbiliar.toLocaleString('id-ID')} B</b></p>
-    <p>Total CHIP RD: <b>${totalChipRDbiliar.toLocaleString('id-ID')} B</b></p>`;
-
-  // Tabel HD
-  document.getElementById('chipTableHD').innerHTML = Object.entries(hd).map(([k, v]) => `
+  <table>
     <tr>
-      <td class='border border-gray-700 p-2'>${k}</td>
-      <td class='border border-gray-700 p-2 text-center'>${v.jumlah}</td>
-      <td class='border border-gray-700 p-2 text-center'>${v.harga}</td>
-      <td class='border border-gray-700 p-2 text-right'>${(v.jumlah * v.harga).toLocaleString('id-ID')}k</td>
-    </tr>`).join('');
-
-  // Tabel RD
-  document.getElementById('chipTable').innerHTML = Object.entries(rd).map(([k, v]) => `
+      <th>Tipe</th>
+      <th>100m</th>
+      <th>500m</th>
+      <th>1b</th>
+      <th>Paket</th>
+    </tr>
     <tr>
-      <td class='border border-gray-700 p-2'>${k}</td>
-      <td class='border border-gray-700 p-2 text-center'>${v.jumlah}</td>
-      <td class='border border-gray-700 p-2 text-center'>${v.harga}</td>
-      <td class='border border-gray-700 p-2 text-right'>${(v.jumlah * v.harga).toLocaleString('id-ID')}k</td>
-    </tr>`).join('');
+      <td>HD</td>
+      <td><input id="hd_100m" type="text" value="0"></td>
+      <td><input id="hd_500m" type="text" value="0"></td>
+      <td><input id="hd_1b" type="text" value="0"></td>
+      <td><input id="hd_paket" type="text" value="0"></td>
+    </tr>
+    <tr>
+      <td>RD</td>
+      <td><input id="rd_100m" type="text" value="0"></td>
+      <td><input id="rd_500m" type="text" value="0"></td>
+      <td><input id="rd_1b" type="text" value="0"></td>
+      <td><input id="rd_paket" type="text" value="0"></td>
+    </tr>
+  </table>
 
-  saveData();
-}
+  <button onclick="hitung()">Hitung</button>
 
-const STORAGE_KEY = "rekapChipData";
-const EXPIRY_KEY = "rekapChipExpiry";
-const EXPIRY_TIME = 3600000;
+  <h3>Hasil:</h3>
+  <pre id="output"></pre>
 
-function saveData() {
-  const data = { saldoAwal: saldoAwal.value, pulsaVoucher: pulsaVoucher.value, pengeluaran: pengeluaran.value, bongkaran: bongkaran.value, grandTotal: grandTotal.value, hd: {}, rd: {} };
-  Object.keys(hd).forEach(k => data.hd[k] = document.getElementById(`hd_${k}`).value);
-  Object.keys(rd).forEach(k => data.rd[k] = document.getElementById(`rd_${k}`).value);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  localStorage.setItem(EXPIRY_KEY, Date.now());
-}
+  <!-- kotak warning -->
+  <div id="warningBox">Kolom paket wajib 10b dan diatasnya !</div>
 
-function loadData() {
-  const expiry = localStorage.getItem(EXPIRY_KEY);
-  if (!expiry || (Date.now() - expiry) > EXPIRY_TIME) { localStorage.removeItem(STORAGE_KEY); return; }
-  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-  if (!saved.saldoAwal) return;
-  saldoAwal.value = saved.saldoAwal; pulsaVoucher.value = saved.pulsaVoucher; pengeluaran.value = saved.pengeluaran; bongkaran.value = saved.bongkaran; grandTotal.value = saved.grandTotal;
-  Object.keys(saved.hd).forEach(k => document.getElementById(`hd_${k}`).value = saved.hd[k]);
-  Object.keys(saved.rd).forEach(k => document.getElementById(`rd_${k}`).value = saved.rd[k]);
-}
+  <script>
+    const hd = {
+      "100m": { jumlah: 0, harga: 6 },
+      "500m": { jumlah: 0, harga: 30 },
+      "1b": { jumlah: 0, harga: 58 },
+      "paket": { jumlah: 0, harga: 57 }
+    };
+    const rd = {
+      "100m": { jumlah: 0, harga: 7 },
+      "500m": { jumlah: 0, harga: 35 },
+      "1b": { jumlah: 0, harga: 65 },
+      "paket": { jumlah: 0, harga: 64 }
+    };
 
-window.onload = () => { buatInputChip('hdInputs', hd, 'hd'); buatInputChip('rdInputs', rd, 'rd'); setTimeout(loadData, 100); setTimeout(hitung, 200); };
-</script>
+    const satuanJuta = {
+      "100m": 100,
+      "500m": 500,
+      "1b": 1000,
+      "paket": 1000
+    };
+
+    function showWarning(msg) {
+      const box = document.getElementById("warningBox");
+      box.innerText = msg;
+      box.style.display = "block";
+      setTimeout(() => {
+        box.style.display = "none";
+      }, 3000);
+    }
+
+    function ambilJumlahChip(dataObj, prefix) {
+      Object.keys(dataObj).forEach(key => {
+        let raw = document.getElementById(`${prefix}_${key}`).value.trim();
+
+        if (!raw) {
+          dataObj[key].jumlah = 0;
+          return;
+        }
+
+        // support input "10+12+15"
+        let total = raw.split("+").reduce((acc, num) => acc + (parseInt(num) || 0), 0);
+
+        if (key === "paket") {
+          if (total < 10) {
+            showWarning("Kolom paket wajib 10b dan diatasnya !");
+            dataObj[key].jumlah = 0;
+          } else {
+            dataObj[key].jumlah = total;
+          }
+        } else {
+          dataObj[key].jumlah = total;
+        }
+      });
+    }
+
+    function hitungTotal(dataObj) {
+      let totalHarga = 0;
+      let totalChip = 0;
+      Object.keys(dataObj).forEach(key => {
+        totalHarga += dataObj[key].jumlah * dataObj[key].harga;
+        totalChip += dataObj[key].jumlah * satuanJuta[key];
+      });
+      return { totalHarga, totalChip };
+    }
+
+    function hitung() {
+      ambilJumlahChip(hd, "hd");
+      ambilJumlahChip(rd, "rd");
+
+      const totalHd = hitungTotal(hd);
+      const totalRd = hitungTotal(rd);
+
+      let output = "";
+
+      output += `HD: ${totalHd.totalChip}M chip, Harga = ${totalHd.totalHarga}k\n`;
+      output += `RD: ${totalRd.totalChip}M chip, Harga = ${totalRd.totalHarga}k\n`;
+
+      const totalSemuaChip = totalHd.totalChip + totalRd.totalChip;
+      const totalSemuaHarga = totalHd.totalHarga + totalRd.totalHarga;
+
+      output += `\nTOTAL SEMUA: ${totalSemuaChip}M chip, Harga = ${totalSemuaHarga}k`;
+
+      document.getElementById("output").innerText = output;
+    }
+  </script>
 </body>
 </html>
