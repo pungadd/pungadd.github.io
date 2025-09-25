@@ -1,15 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Hitung Chip</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Rekap Penjualan Chip</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    table, th, td {
-      border: 1px solid black;
-      border-collapse: collapse;
-      padding: 5px;
-      text-align: center;
-    }
     #warningBox {
       display: none;
       position: fixed;
@@ -26,125 +22,188 @@
     }
   </style>
 </head>
-<body>
-  <h2>Hitung Chip</h2>
+<body class="bg-gradient-to-br from-gray-900 to-gray-700 min-h-screen text-white font-sans">
 
-  <table>
-    <tr>
-      <th>Tipe</th>
-      <th>100m</th>
-      <th>500m</th>
-      <th>1b</th>
-      <th>Paket</th>
-    </tr>
-    <tr>
-      <td>HD</td>
-      <td><input id="hd_100m" type="text" value="0"></td>
-      <td><input id="hd_500m" type="text" value="0"></td>
-      <td><input id="hd_1b" type="text" value="0"></td>
-      <td><input id="hd_paket" type="text" value="0"></td>
-    </tr>
-    <tr>
-      <td>RD</td>
-      <td><input id="rd_100m" type="text" value="0"></td>
-      <td><input id="rd_500m" type="text" value="0"></td>
-      <td><input id="rd_1b" type="text" value="0"></td>
-      <td><input id="rd_paket" type="text" value="0"></td>
-    </tr>
-  </table>
+<div class="max-w-6xl mx-auto py-10 px-5">
+  <h1 class="text-3xl font-bold text-center mb-8">💎 Kalkulator Rekap Penjualan Chip</h1>
 
-  <button onclick="hitung()">Hitung</button>
+  <!-- GRID INPUT -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Input Data Keuangan -->
+    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+      <h2 class="text-xl font-semibold mb-4">Input Data Keuangan</h2>
+      <label>Saldo Awal (ribu)</label>
+      <input id="saldoAwal" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
+      <label>Pulsa Voucher</label>
+      <input id="pulsaVoucher" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
+      <label>Pengeluaran</label>
+      <input id="pengeluaran" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
+      <label>Bongkaran</label>
+      <input id="bongkaran" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
+      <label>Grand Total</label>
+      <input id="grandTotal" class="w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3" value="0">
+    </div>
 
-  <h3>Hasil:</h3>
-  <pre id="output"></pre>
+    <!-- Input CHIP HD -->
+    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+      <h2 class="text-xl font-semibold mb-4">Input Jumlah CHIP HD</h2>
+      <div id="hdInputs"></div>
+    </div>
 
-  <!-- kotak warning -->
-  <div id="warningBox">Kolom paket wajib 10b dan diatasnya !</div>
+    <!-- Input CHIP RD -->
+    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+      <h2 class="text-xl font-semibold mb-4">Input Jumlah CHIP RD</h2>
+      <div id="rdInputs"></div>
+      <button onclick="hitung()" class="bg-blue-500 hover:bg-blue-600 w-full p-3 rounded-lg font-bold mt-4">Hitung</button>
+    </div>
+  </div>
 
-  <script>
-    const hd = {
-      "100m": { jumlah: 0, harga: 6 },
-      "500m": { jumlah: 0, harga: 30 },
-      "1b": { jumlah: 0, harga: 58 },
-      "paket": { jumlah: 0, harga: 57 }
-    };
-    const rd = {
-      "100m": { jumlah: 0, harga: 7 },
-      "500m": { jumlah: 0, harga: 35 },
-      "1b": { jumlah: 0, harga: 65 },
-      "paket": { jumlah: 0, harga: 64 }
-    };
+  <!-- Hasil Rekap -->
+  <div id="hasil" class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
+    <h2 class="text-xl font-semibold mb-4">Hasil Rekap</h2>
+    <div id="output" class="space-y-2 text-lg"></div>
+  </div>
 
-    const satuanJuta = {
-      "100m": 100,
-      "500m": 500,
-      "1b": 1000,
-      "paket": 1000
-    };
+  <!-- DETAIL CHIP HD -->
+  <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
+    <h2 class="text-xl font-semibold mb-4">Detail Penjualan CHIP HD</h2>
+    <table class="w-full border-collapse border border-gray-700">
+      <thead class="bg-gray-900">
+        <tr>
+          <th class="p-2 border border-gray-700">Jenis</th>
+          <th class="p-2 border border-gray-700">Jumlah</th>
+          <th class="p-2 border border-gray-700">Harga (1k)</th>
+          <th class="p-2 border border-gray-700">Total (ribu)</th>
+        </tr>
+      </thead>
+      <tbody id="chipTableHD"></tbody>
+    </table>
+  </div>
 
-    function showWarning(msg) {
-      const box = document.getElementById("warningBox");
-      box.innerText = msg;
-      box.style.display = "block";
-      setTimeout(() => {
-        box.style.display = "none";
-      }, 3000);
+  <!-- DETAIL CHIP RD -->
+  <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
+    <h2 class="text-xl font-semibold mb-4">Detail Penjualan CHIP RD</h2>
+    <table class="w-full border-collapse border border-gray-700">
+      <thead class="bg-gray-900">
+        <tr>
+          <th class="p-2 border border-gray-700">Jenis</th>
+          <th class="p-2 border border-gray-700">Jumlah</th>
+          <th class="p-2 border border-gray-700">Harga (1k)</th>
+          <th class="p-2 border border-gray-700">Total (ribu)</th>
+        </tr>
+      </thead>
+      <tbody id="chipTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- kotak warning -->
+<div id="warningBox">Kolom paket wajib 10b dan diatasnya !</div>
+
+<script>
+const hd = {
+  "100m": { jumlah: 0, harga: 6 },
+  "500m": { jumlah: 0, harga: 30 },
+  "1b": { jumlah: 0, harga: 58 },
+  "paket": { jumlah: 0, harga: 57 }
+};
+const rd = {
+  "100m": { jumlah: 0, harga: 7 },
+  "500m": { jumlah: 0, harga: 35 },
+  "1b": { jumlah: 0, harga: 65 },
+  "paket": { jumlah: 0, harga: 64 }
+};
+const satuanJuta = {
+  "100m": 100,
+  "500m": 500,
+  "1b": 1000,
+  "paket": 1000
+};
+
+function showWarning(msg) {
+  const box = document.getElementById("warningBox");
+  box.innerText = msg;
+  box.style.display = "block";
+  setTimeout(() => { box.style.display = "none"; }, 3000);
+}
+
+function buatInputChip(containerId, dataObj, prefix) {
+  document.getElementById(containerId).innerHTML = Object.keys(dataObj).map(key => `
+    <label class='block mb-1'>${key}</label>
+    <input id='${prefix}_${key}' class='w-full p-2 rounded bg-gray-900 border border-gray-600 mb-3' value='0'>
+  `).join('');
+}
+
+function ambilJumlahChip(dataObj, prefix) {
+  Object.keys(dataObj).forEach(key => {
+    let raw = document.getElementById(`${prefix}_${key}`).value.trim();
+    if (!raw) { dataObj[key].jumlah = 0; return; }
+    let total = raw.split("+").reduce((acc, num) => acc + (parseInt(num) || 0), 0);
+
+    if (key === "paket") {
+      if (total < 10) {
+        showWarning("Kolom paket wajib 10b dan diatasnya !");
+        dataObj[key].jumlah = 0;
+      } else {
+        dataObj[key].jumlah = total;
+      }
+    } else {
+      dataObj[key].jumlah = total;
     }
+  });
+}
 
-    function ambilJumlahChip(dataObj, prefix) {
-      Object.keys(dataObj).forEach(key => {
-        let raw = document.getElementById(`${prefix}_${key}`).value.trim();
+function hitungTotalChip(obj) {
+  return Object.values(obj).reduce((acc, x) => acc + (x.jumlah * x.harga), 0);
+}
 
-        if (!raw) {
-          dataObj[key].jumlah = 0;
-          return;
-        }
+function hitung() {
+  ambilJumlahChip(hd, 'hd');
+  ambilJumlahChip(rd, 'rd');
 
-        // support input "10+12+15"
-        let total = raw.split("+").reduce((acc, num) => acc + (parseInt(num) || 0), 0);
+  const input = {
+    saldoAwal: eval(document.getElementById('saldoAwal').value),
+    pulsaVoucher: eval(document.getElementById('pulsaVoucher').value),
+    pengeluaran: eval(document.getElementById('pengeluaran').value),
+    bongkaran: eval(document.getElementById('bongkaran').value),
+    grandTotal: eval(document.getElementById('grandTotal').value)
+  };
 
-        if (key === "paket") {
-          if (total < 10) {
-            showWarning("Kolom paket wajib 10b dan diatasnya !");
-            dataObj[key].jumlah = 0;
-          } else {
-            dataObj[key].jumlah = total;
-          }
-        } else {
-          dataObj[key].jumlah = total;
-        }
-      });
-    }
+  let chipTotal = hitungTotalChip(hd) + hitungTotalChip(rd);
+  let saldoAwal = input.saldoAwal * 1000;
+  let chip = chipTotal * 1000;
+  let pulsaVoucher = input.pulsaVoucher * 1000;
+  let pengeluaran = input.pengeluaran * 1000;
+  let bongkaran = input.bongkaran * 1000;
+  let grandTotal = input.grandTotal * 1000;
+  let jumlahMasuk = saldoAwal + chip + pulsaVoucher;
+  let sisaUang = jumlahMasuk - pengeluaran - bongkaran;
+  let selisih = grandTotal - sisaUang;
 
-    function hitungTotal(dataObj) {
-      let totalHarga = 0;
-      let totalChip = 0;
-      Object.keys(dataObj).forEach(key => {
-        totalHarga += dataObj[key].jumlah * dataObj[key].harga;
-        totalChip += dataObj[key].jumlah * satuanJuta[key];
-      });
-      return { totalHarga, totalChip };
-    }
+  let totalChipHDbiliar = Object.entries(hd).reduce((t, [k, { jumlah }]) => t + (jumlah * (satuanJuta[k] || 0) / 1000), 0);
+  let totalChipRDbiliar = Object.entries(rd).reduce((t, [k, { jumlah }]) => t + (jumlah * (satuanJuta[k] || 0) / 1000), 0);
 
-    function hitung() {
-      ambilJumlahChip(hd, "hd");
-      ambilJumlahChip(rd, "rd");
+  document.getElementById('output').innerHTML = `
+    <p>Saldo Awal: <b>${saldoAwal.toLocaleString('id-ID')}</b></p>
+    <p>Chip Terjual: <b>${chip.toLocaleString('id-ID')}</b></p>
+    <p>Pulsa/Voucher: <b>${pulsaVoucher.toLocaleString('id-ID')}</b></p>
+    <hr class='border-gray-600'>
+    <p>Jumlah Masuk: <b>${jumlahMasuk.toLocaleString('id-ID')}</b></p>
+    <p>Pengeluaran: <b>${pengeluaran.toLocaleString('id-ID')}</b></p>
+    <p>Bongkaran: <b>${bongkaran.toLocaleString('id-ID')}</b></p>
+    <hr class='border-gray-600'>
+    <p>Sisa Uang: <b>${sisaUang.toLocaleString('id-ID')}</b></p>
+    <p>Uang Tersedia: <b>${grandTotal.toLocaleString('id-ID')}</b></p>
+    <p>Selisih: <span class='${selisih < 0 ? "text-red-400" : "text-green-400"}'><b>${selisih.toLocaleString('id-ID')}</b></span></p>
+    <p>Total CHIP HD: <b>${totalChipHDbiliar.toLocaleString('id-ID')} B</b></p>
+    <p>Total CHIP RD: <b>${totalChipRDbiliar.toLocaleString('id-ID')} B</b></p>`;
+}
 
-      const totalHd = hitungTotal(hd);
-      const totalRd = hitungTotal(rd);
-
-      let output = "";
-
-      output += `HD: ${totalHd.totalChip}M chip, Harga = ${totalHd.totalHarga}k\n`;
-      output += `RD: ${totalRd.totalChip}M chip, Harga = ${totalRd.totalHarga}k\n`;
-
-      const totalSemuaChip = totalHd.totalChip + totalRd.totalChip;
-      const totalSemuaHarga = totalHd.totalHarga + totalRd.totalHarga;
-
-      output += `\nTOTAL SEMUA: ${totalSemuaChip}M chip, Harga = ${totalSemuaHarga}k`;
-
-      document.getElementById("output").innerText = output;
-    }
-  </script>
+window.onload = () => { 
+  buatInputChip('hdInputs', hd, 'hd'); 
+  buatInputChip('rdInputs', rd, 'rd'); 
+  setTimeout(hitung, 200); 
+};
+</script>
 </body>
-</html>
+            </html>
